@@ -1,5 +1,4 @@
 import argparse
-from weights import A0, A1, A2
 from sklearn.metrics import adjusted_rand_score
 from sklearn.metrics import normalized_mutual_info_score
 import numpy as np
@@ -107,7 +106,7 @@ class KM():
           X:                np.ndarray,
           idxs:             list, 
           k:                int,
-          max_repetitions:  int = 1000,
+          max_repetitions:  int = 100000,
           hyp_clusters:     list = None,
           beta_degree:      float = 1.
           ) -> list:
@@ -158,17 +157,25 @@ class KM():
       # Declaring a cluster membership label vector
       membership = np.zeros(N, dtype=int)
       # Clusters initialization:
+      p = np.random.permutation(N)
       if hyp_clusters is None:
           # Choosing random centers
-          p = np.random.permutation(N)
           inc = p[:k]
           cent = Y[inc, :]  # k x m matrix of initial cluster centers (standardized)
           membership[inc] = np.arange(k)
       else:
           cent = np.array([np.mean(Y[list(cluster)], axis=0) for cluster in hyp_clusters])
+          inc = p[:(k - cent.shape[0])]
+          cent2 = Y[inc, :]
+          cent = np.vstack([cent, cent2])
+          #membership[inc] = np.arange(k) + cent.shape[0]
+          
+          
 
       # Iterations of updates of clusters and centroids
-      while flag == 0:
+      i = 0
+      w = 0
+      while flag == 0 and i < max_repetitions:
           labelc, wc = self.clusterupdate(Y, cent)
           if np.array_equal(labelc, membership):
               flag = 1
@@ -176,6 +183,7 @@ class KM():
           else:
               cent = self.ceupdate(Y, labelc)
               membership = labelc
+          i += 1
 
       # Packing the output data
       wd = w * 100 / dd  # Unexplained data variance, percentage
@@ -191,6 +199,8 @@ class KM():
 
 
 if __name__ == "__main__":
+  from weights import A0, A1, A2
+  
   parser = argparse.ArgumentParser()
   parser.add_argument('--dataroot', required=True, help='path to dataset')
   parser.add_argument('--weightsfunc', required=True, help='weights function from the list: A0(without weights) | A1(Euclidian) } A2(Corvalho)')

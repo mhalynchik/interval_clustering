@@ -1,11 +1,9 @@
 import argparse
-from weights import A0, A1, A2
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import adjusted_rand_score
 from sklearn.metrics import normalized_mutual_info_score
 import numpy as np
-
 
 
 class BANCOIn():
@@ -20,7 +18,7 @@ class BANCOIn():
     #normalization flags
     self.FLAG_CENTER_DATA = kwargs.setdefault("center_data", True)
     self.FLAG_MINMAX_NORAMILIZE_DATA = kwargs.setdefault("minmax_normilize", True)
-    self.FLAG_SCALE_BY_VAR = kwargs.setdefault("scale_by_var", True)
+    self.FLAG_SCALE_BY_VAR = kwargs.setdefault("scale_by_var", False)
 
 
     self.CUR = {'remove': self.cluster_update_remove,
@@ -30,6 +28,7 @@ class BANCOIn():
   def normalize_data(self, 
                      data: np.ndarray
                      ) -> np.ndarray:
+  
     """
     Standardizes data given the data matrix.
 
@@ -38,9 +37,8 @@ class BANCOIn():
 
     Returns:
         numpy.ndarray: Standardized data.
-    """ 
-
-
+    """
+     
     # 0. Data preprocessing
     # 0.1. centering
     if self.FLAG_CENTER_DATA:
@@ -233,6 +231,8 @@ class BANCOIn():
     return S
 
 if __name__ == "__main__":
+  from weights import A0, A1, A2
+  
   parser = argparse.ArgumentParser()
   parser.add_argument('--dataroot', required=True, help='path to dataset')
   parser.add_argument('--weightsfunc', required=True, help='weights function from the list: A0(without weights) | A1(Euclidian) } A2(Corvalho)')
@@ -246,7 +246,6 @@ if __name__ == "__main__":
   parser.add_argument('--d', default='3d', required=False, help='way to calculate weights: 2d | 3d')
   parser.add_argument('--K', required=False, help='number of clusters')
   parser.add_argument('--manualSeed', type=int, help='manual seed')
-
 
 
   opt = parser.parse_args()
@@ -305,9 +304,3 @@ if __name__ == "__main__":
 
     print("ARI: ", round(adjusted_rand_score(r_labels, alg_labels), 2),
           "\tNMI: ", round(normalized_mutual_info_score(r_labels, alg_labels), 2))
-
-
-
-  
-
-  

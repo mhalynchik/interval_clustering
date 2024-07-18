@@ -1,5 +1,4 @@
 import argparse
-from weights import A0, A1, A2
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import adjusted_rand_score
@@ -20,7 +19,7 @@ class IKM():
     #normalization flags
     self.FLAG_CENTER_DATA = kwargs.setdefault("center_data", True)
     self.FLAG_MINMAX_NORAMILIZE_DATA = kwargs.setdefault("minmax_normilize", True)
-    self.FLAG_SCALE_BY_VAR = kwargs.setdefault("scale_by_var", True)
+    self.FLAG_SCALE_BY_VAR = kwargs.setdefault("scale_by_var", False)
 
 
 
@@ -74,19 +73,26 @@ class IKM():
   def euclidian_d(self,
                   x: np.ndarray,
                   y: np.ndarray,
+                  k: int,
                   ) -> np.ndarray:
     """
-    Calculates the squared difference between x and y.
+    Calculates the squared euclidian distance between x and y.
 
     Args:
         x  (numpy.ndarray): object 1
         y  (numpy.ndarray): object 2
+        k  (int):           cluster index
 
     Returns:
         numpy.ndarray: Squared difference between x and y.
     """
-
-    return (x - y)**2
+    
+    weights = self.weights[k]**self.beta_degree \
+          if self.d == '3d' \
+          else self.weights**self.beta_degree
+          
+    
+    return np.sum(weights * (x - y)**2)
 
   def obj_to_cl_d(self, 
                   obj:                    np.ndarray, 
@@ -109,11 +115,8 @@ class IKM():
 
     if cluster_len == 0:
       return 0
-    weights = self.weights[k]**self.beta_degree \
-              if self.d == '3d' \
-              else self.weights**self.beta_degree
 
-    return np.sum(weights * self.euclidian_d(obj, cl_best_representative))
+    return self.euclidian_d(obj, cl_best_representative, k)
 
   # Algorithm:
   # 0. Data preprocessing:
@@ -170,7 +173,43 @@ class IKM():
     self.weights = np.full((K, self.V), 1, dtype=np.float64)\
                    if self.d == '3d'\
                    else np.full(self.V, 1, dtype=np.float64)
+                   
+    """
 
+    # 2. conditional block for clusters initialization:
+    # 2.1. run from random clusters
+    # 2.2. run from user-specified clusters
+    
+    # initialization from scratch
+    if not hyp_clusters:
+      clusters = [set([g_idx[i]]) for i in range(K)]
+      obj_to_cluster_map = {e_i:k for k in range(K) for e_i in clusters[k]}
+    else:
+      # 2.2. initialization from hypothetical clusters
+      for k in range(len(hyp_clusters)):
+        BP[k] = self.cluster_best_prototype(data[list(hyp_clusters[k])])
+        #clusters[k] = hyp_clusters[k]
+        obj_to_cluster_map = {}
+      
+      clusters = [set() for k in range(K)]
+      
+    """
+    
+    """
+
+    # list of unmatched objects
+    I_k = list(set(range(self.N)) - set(obj_to_cluster_map.keys()))
+
+    # 3. completion of clusters
+    # add rest objects to clusters with minimum(by prototypes) distances
+    min_id = {e_i:np.argmin([self.obj_to_cl_d(data[e_i], BP[m], m, len(list(clusters[m]))) for m in range(K)]) for e_i in I_k}
+    for k in range(K):
+      clusters[k].update({e_i for e_i in I_k\
+                      if min_id[e_i] == k})
+      I_k = list(set(I_k) - clusters[k])
+      obj_to_cluster_map.update({e_i:k for e_i in clusters[k]})
+      
+    """
     # 2. conditional block for clusters initialization:
     # 2.1. run from random clusters
     # 2.2. run from user-specified clusters
@@ -195,6 +234,7 @@ class IKM():
                       if min_id[e_i] == k})
       I_k = list(set(I_k) - clusters[k])
       obj_to_cluster_map.update({e_i:k for e_i in clusters[k]})
+
 
 
     for i in range(max_repetitions):
@@ -225,6 +265,8 @@ class IKM():
 
 
 if __name__ == "__main__":
+  from weights import A0, A1, A2
+
   parser = argparse.ArgumentParser()
   parser.add_argument('--dataroot', required=True, help='path to dataset')
   parser.add_argument('--weightsfunc', required=True, help='weights function from the list: A0(without weights) | A1(Euclidian) } A2(Corvalho)')
