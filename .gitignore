@@ -1,0 +1,51 @@
+# Local environments and interpreter caches
+shell.nix
+.venv*/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Manuscript sources, compiled documents, and correspondence
+*.tex
+*.pdf
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+letter/
+
+# Additional datasets outside the manuscript experiment
+data/*.txt
+subdatasets/Iris/
+subdatasets/Wine/
+subdatasets/Fish/
+subdatasets/Fungi_carvalho/
+subdatasets/Car/
+subdatasets/Abalone/
+subdatasets/Temperature/
+subdatasets/Horses/
+subdatasets/Water/
+experiments/data/new/*
+!experiments/data/new/Iris/
+experiments/data/new/Iris/*
+!experiments/data/new/Iris/data.csv
+!experiments/data/new/Iris/data.npy
+!experiments/data/new/Iris/real_clusters.txt
+!experiments/data/new/Iris/reference_clusters.txt
+
+# Retain only the immutable result package used by the revised manuscript
+experiments/results/*
+!experiments/results/ward_final/
+experiments/results/ward_final/*
+!experiments/results/ward_final/manifest.json
+!experiments/results/ward_final/Fungi_3.json
+!experiments/results/ward_final/Fungi_4.json
+!experiments/results/ward_final/Fungi_5.json
+!experiments/results/ward_final/BSP_3.json
+!experiments/results/ward_final/BSP_4.json
+!experiments/results/ward_final/BSP_5.json
+!experiments/results/ward_final/Iris.json

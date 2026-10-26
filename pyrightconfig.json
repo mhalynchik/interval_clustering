@@ -1,0 +1,19 @@
+{
+  "include": [
+    "Algs",
+    "experiments/revision_*.py",
+    "experiments/manuscript_tables.py",
+    "tests"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "letter",
+    "experiments/results",
+    "experiments/data",
+    ".venv",
+    ".venv-paper",
+    "venv"
+  ],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "basic"
+}

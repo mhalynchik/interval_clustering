@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the accompanying manuscript."
+title: "Anomalous Euclidean k-means clustering for interval data"
+type: software
+authors:
+  - family-names: Mirkin
+    given-names: B.
+  - family-names: Halynchyk
+    given-names: M.
+  - family-names: Parinov
+    given-names: A.
+  - family-names: de Carvalho
+    given-names: Francisco de A. T.
+abstract: >-
+  Research software and recorded experiments for anomalous-cluster initialization
+  and weighted k-means clustering of interval-valued data.
